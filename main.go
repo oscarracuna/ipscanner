@@ -1,5 +1,9 @@
 package main
 
+// TODO: Error handleling
+// Infinite loop in case IP is not valid 
+// Add csv iteration for caps so you can scan ping the entire office with just the cap number
+
 import (
 	"fmt"
 	"strconv"
@@ -12,7 +16,6 @@ var (
 	ip string
 )
 
-// TODO: Add csv iteration for caps so you can scan ping the entire office with just the cap number
 func main() {
 
 	fmt.Print("Enter IP: ")
