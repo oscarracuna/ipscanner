@@ -23,18 +23,21 @@ var (
 )
 
 func main() {
-	//These funky texts, puth them somwhere else. Maybe another file and import them here.
-	//It takes up alot of space and makes it hard to read.
 
 	fmt.Println(ascii.Ascii_saludo())
 
 prompt:
 	fmt.Print("Enter LAN IP or VNC: ")
 	fmt.Scanln(&ip)
+	isIP(ip)
 	//Here, create another function that is given an IP, in this case a string. Check if it is a proper IP
 	//Requirments mean, 4 subsets of a NUMBER(check for only integers here), each in a range between 0-255
 	//Return a boolean, false or true.
 	//On False, exit
+
+	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// Should Regex be used for this, instead?
+	// They're not readable at all
 
 	splitIP := strings.Split(ip, ".")
 	arrayOfIP := splitIP[0:3]
@@ -68,6 +71,21 @@ prompt:
 	fmt.Println("\nScan completed.")
 	fmt.Print("\n\n\n")
 	goto prompt
+}
+
+// Testing func to validate IP
+
+func isIP(ip string) bool {
+
+	splitIP := strings.Split(ip, ".")
+	oct1, _ := strconv.Atoi(splitIP[0])
+	oct2, _ := strconv.Atoi(splitIP[1])
+	oct3, _ := strconv.Atoi(splitIP[2])
+	oct4, _ := strconv.Atoi(splitIP[3])
+
+	// Gotta figure out how to make this func work
+
+	return true
 }
 
 /* Testing port discovery with nmap library for Go
