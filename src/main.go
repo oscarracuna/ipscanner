@@ -8,6 +8,7 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -29,39 +30,45 @@ func main() {
 prompt:
 	fmt.Print("Enter LAN IP or VNC: ")
 	fmt.Scanln(&ip)
-	isIP(ip)
-	//Here, create another function that is given an IP, in this case a string. Check if it is a proper IP
-	//Requirments mean, 4 subsets of a NUMBER(check for only integers here), each in a range between 0-255
-	//Return a boolean, false or true.
-	//On False, exit
 
-	// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	// Should Regex be used for this, instead?
-	// They're not readable at all
+	confirmIP := isIP(ip)
 
-	splitIP := strings.Split(ip, ".")
-	arrayOfIP := splitIP[0:3]
-	joinedArrayofIP := strings.Join(arrayOfIP, ".")
+	if confirmIP == true {
+		splitIP := strings.Split(ip, ".")
+		arrayOfIP := splitIP[0:3]
+		joinedArrayofIP := strings.Join(arrayOfIP, ".")
+		for i := 0; i <= 255; i++ {
+			// This converts ints to ascii
+			temp := strconv.Itoa(i)
+			newIP := joinedArrayofIP + "." + temp
 
-	for i := 0; i <= 255; i++ {
-		// This converts ints to ascii
-		temp := strconv.Itoa(i)
-		newIP := joinedArrayofIP + "." + temp
+			pingu, _ := probing.NewPinger(newIP)
+			pingu.SetPrivileged(true)
+			pingu.Count = 1
+			pingu.Timeout = 200 * time.Millisecond
+			pingu.Run()
 
-		pingu, _ := probing.NewPinger(newIP)
-		pingu.SetPrivileged(true)
-		pingu.Count = 1
-		pingu.Timeout = 200 * time.Millisecond
-		pingu.Run()
+			stats := pingu.Statistics()
+			rcv := stats.PacketsRecv
+			if rcv >= 1 {
+				fmt.Println(Green+"Host alive:", newIP+Reset)
+			}
+			if rcv >= 1 && i == 126 {
+				fmt.Println(Green+"Host alive:", newIP+Reset, "<- Fortigate")
+			} else {
+				fmt.Println("Something went wrong while pinging IPs")
+				goto prompt
+			}
 
-		stats := pingu.Statistics()
-		rcv := stats.PacketsRecv
-		if rcv >= 1 {
-			fmt.Println(Green+"Host alive:", newIP+Reset)
 		}
-		if rcv >= 1 && i == 126 {
-			fmt.Println(Green+"Host alive:", newIP+Reset, "<- Fortigate")
-		}
+		//Here, create another function that is given an IP, in this case a string. Check if it is a proper IP
+		//Requirments mean, 4 subsets of a NUMBER(check for only integers here), each in a range between 0-255
+		//Return a boolean, false or true.
+		//On False, exit
+
+		// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		// Should Regex be used for this, instead?
+		// They're not readable at all
 
 		//Here, you can also put another function to post out a Dead Port
 		//It seems slower because I am only seeing 1 side, the alive side
@@ -73,8 +80,14 @@ prompt:
 	goto prompt
 }
 
-// Testing func to validate IP
+func isIP(ip string) bool {
+	var ipRegex = regexp.MustCompile(`^([0-9]{1,3}\.){3}[0-9]{1,3}$`)
+	return ipRegex.MatchString(ip)
+}
 
+// OK, trying regex instead
+// Testing func to validate IP
+/*
 func isIP(ip string) bool {
 
 	splitIP := strings.Split(ip, ".")
@@ -87,6 +100,7 @@ func isIP(ip string) bool {
 
 	return true
 }
+*/
 
 /* Testing port discovery with nmap library for Go
 func nmapTest() {
