@@ -1,5 +1,7 @@
 package main
 
+// TODO: Figure out go routines or threads
+
 import (
 	"fmt"
 	"regexp"
@@ -19,14 +21,12 @@ var (
 
 func main() {
 
-	//This is the ascii art thing
 	fmt.Println(ascii.Ascii_saludo())
 
 prompt:
 	fmt.Print("Enter LAN IP or VNC: ")
 	fmt.Scanln(&ip)
 
-	// This calls the func uses regex to validate IP
 	confirmIP := isIP(ip)
 
 	if confirmIP == true {
@@ -69,11 +69,6 @@ func isIP(ip string) bool {
 	var ipRegex = regexp.MustCompile(`^([0-9]{1,3}\.){3}[0-9]{1,3}$`)
 	return ipRegex.MatchString(ip)
 }
-
-//Here, you can also put another function to post out a Dead Port
-//It seems slower because I am only seeing 1 side, the alive side
-//Angry scanner is also using threads, we are only using 1 thread here so its doing all of the work.
-
 
 /* Testing port discovery with nmap library for Go
 func nmapTest() {
