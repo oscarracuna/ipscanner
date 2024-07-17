@@ -1,11 +1,5 @@
 package main
 
-// TODO: Error handleling
-// Infinite loop in case IP is not valid
-// Add csv iteration for caps so you can scan ping the entire office with just the cap number
-// Possibly add port discovery and output which endpoints may be printers
-// Go routines may be the way
-
 import (
 	"fmt"
 	"regexp"
@@ -25,12 +19,14 @@ var (
 
 func main() {
 
+	//This is the ascii art thing
 	fmt.Println(ascii.Ascii_saludo())
 
 prompt:
 	fmt.Print("Enter LAN IP or VNC: ")
 	fmt.Scanln(&ip)
 
+	// This calls the func uses regex to validate IP
 	confirmIP := isIP(ip)
 
 	if confirmIP == true {
@@ -51,39 +47,41 @@ prompt:
 			stats := pingu.Statistics()
 			rcv := stats.PacketsRecv
 			if rcv >= 1 {
-				fmt.Println(Green+"Host alive:", newIP+Reset)
+				fmt.Println(Green+"Host alive:", Reset+newIP)
 			}
 			if rcv >= 1 && i == 126 {
-				fmt.Println(Green+"Host alive:", newIP+Reset, "<- Fortigate")
-			} else {
-				fmt.Println("Something went wrong while pinging IPs")
+				fmt.Println(Green+"Host alive:", Reset+newIP, "<- Fortigate")
+			}
+			if i == 255 {
+				fmt.Println("\nScan completed.")
+				fmt.Print("\n\n\n")
 				goto prompt
 			}
-
 		}
-		//Here, create another function that is given an IP, in this case a string. Check if it is a proper IP
-		//Requirments mean, 4 subsets of a NUMBER(check for only integers here), each in a range between 0-255
-		//Return a boolean, false or true.
-		//On False, exit
-
-		// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		// Should Regex be used for this, instead?
-		// They're not readable at all
-
-		//Here, you can also put another function to post out a Dead Port
-		//It seems slower because I am only seeing 1 side, the alive side
-		//Angry scanner is also using threads, we are only using 1 thread here so its doing all of the work.
-
+	} else {
+		fmt.Println("Invalid IP. Please provide a valid IP address.")
+		goto prompt
 	}
-	fmt.Println("\nScan completed.")
-	fmt.Print("\n\n\n")
-	goto prompt
+
 }
 
 func isIP(ip string) bool {
 	var ipRegex = regexp.MustCompile(`^([0-9]{1,3}\.){3}[0-9]{1,3}$`)
 	return ipRegex.MatchString(ip)
 }
+
+//Here, create another function that is given an IP, in this case a string. Check if it is a proper IP
+//Requirments mean, 4 subsets of a NUMBER(check for only integers here), each in a range between 0-255
+//Return a boolean, false or true.
+//On False, exit
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// Should Regex be used for this, instead?
+// They're not readable at all
+
+//Here, you can also put another function to post out a Dead Port
+//It seems slower because I am only seeing 1 side, the alive side
+//Angry scanner is also using threads, we are only using 1 thread here so its doing all of the work.
 
 // OK, trying regex instead
 // Testing func to validate IP
