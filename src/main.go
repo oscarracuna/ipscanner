@@ -70,35 +70,10 @@ func isIP(ip string) bool {
 	return ipRegex.MatchString(ip)
 }
 
-//Here, create another function that is given an IP, in this case a string. Check if it is a proper IP
-//Requirments mean, 4 subsets of a NUMBER(check for only integers here), each in a range between 0-255
-//Return a boolean, false or true.
-//On False, exit
-
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-// Should Regex be used for this, instead?
-// They're not readable at all
-
 //Here, you can also put another function to post out a Dead Port
 //It seems slower because I am only seeing 1 side, the alive side
 //Angry scanner is also using threads, we are only using 1 thread here so its doing all of the work.
 
-// OK, trying regex instead
-// Testing func to validate IP
-/*
-func isIP(ip string) bool {
-
-	splitIP := strings.Split(ip, ".")
-	oct1, _ := strconv.Atoi(splitIP[0])
-	oct2, _ := strconv.Atoi(splitIP[1])
-	oct3, _ := strconv.Atoi(splitIP[2])
-	oct4, _ := strconv.Atoi(splitIP[3])
-
-	// Gotta figure out how to make this func work
-
-	return true
-}
-*/
 
 /* Testing port discovery with nmap library for Go
 func nmapTest() {
