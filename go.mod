@@ -2,7 +2,10 @@ module github.com/oscarracuna/ipscanner
 
 go 1.22.4
 
-require github.com/prometheus-community/pro-bing v0.4.0
+require (
+	github.com/Ullaakut/nmap/v3 v3.0.3
+	github.com/prometheus-community/pro-bing v0.4.0
+)
 
 require (
 	github.com/google/uuid v1.6.0 // indirect

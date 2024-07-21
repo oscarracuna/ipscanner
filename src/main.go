@@ -4,7 +4,7 @@ package main
 // TODO: Pinger function
 // UPDATE: Concurreny works really well but we get false negatives
 // TODO: Improve accuracy by implementing redundancy
-
+// Redundancy is not needed. Going for higher threshold with timeouts
 
 import (
 	"fmt"
@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/oscarracuna/ipscanner/pkg/ascii"
+  "github.com/oscarracuna/ipscanner/pkg/nmaper"
 	probing "github.com/prometheus-community/pro-bing"
 )
 
@@ -47,19 +48,21 @@ prompt:
 				temp := strconv.Itoa(i)
 				newIP := joinedArrayofIP + "." + temp
 
+        ports := nmaper.Nmap(newIP)
+
 				pingu, _ := probing.NewPinger(newIP)
 				pingu.SetPrivileged(true)
-				pingu.Count = 6
-				pingu.Timeout = 200 * time.Millisecond
+				pingu.Count = 1
+				pingu.Timeout = 1000 * time.Millisecond
 				pingu.Run()
 
 				stats := pingu.Statistics()
 				rcv := stats.PacketsRecv
-				if rcv >= 3 {
+				if rcv >= 1 {
 					if i == 126 {
-						results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate", Green, Reset, newIP)
+            results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate - Ports: %s", Green, Reset, newIP, ports)
 					} else {
-						results <- fmt.Sprintf("%sHost alive: %s%s", Green, Reset, newIP)
+            results <- fmt.Sprintf("%sHost alive: %s%s - Ports: %s", Green, Reset, newIP, ports)
 					}
 				}
 			}(i)
