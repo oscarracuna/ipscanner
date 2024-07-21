@@ -4,7 +4,7 @@ package main
 // TODO: Pinger function
 // UPDATE: Concurreny works really well but we get false negatives
 // TODO: Improve accuracy by implementing redundancy
-// Redundancy is not needed. Going for higher threshold with timeouts
+// Redundancy is not needed. Going for higher threshold for timeouts
 
 import (
 	"fmt"
@@ -93,18 +93,3 @@ func isIP(ip string) bool {
 	return ipRegex.MatchString(ip)
 }
 
-//Testing port discovery with nmap library for Go
-/*
-func nmapTest(test string) {
-  ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
-  defer cancel()
-
-
-  scanner, err := nmap.NewScanner(
-    ctx,
-    nmap.WithTargets(&ip),
-    nmap.WithPorts(ports)
-  )
-  return
-}
-*/
