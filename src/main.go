@@ -1,12 +1,14 @@
 package main
 
 // TODO: Figure out go routines or threads
+// TODO: Pinger function
 
 import (
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/oscarracuna/ipscanner/pkg/ascii"
@@ -20,50 +22,62 @@ var (
 )
 
 func main() {
-
 	fmt.Println(ascii.Ascii_saludo())
 
 prompt:
 	fmt.Print("Enter LAN IP or VNC: ")
 	fmt.Scanln(&ip)
-  
+
 	confirmIP := isIP(ip)
-//nmapTest(ip)
-  
-	if confirmIP == true {
+
+	if confirmIP {
 		splitIP := strings.Split(ip, ".")
 		arrayOfIP := splitIP[0:3]
 		joinedArrayofIP := strings.Join(arrayOfIP, ".")
+
+		var wg sync.WaitGroup
+		results := make(chan string, 256)
 		for i := 0; i <= 255; i++ {
-			// This converts ints to ascii
-			temp := strconv.Itoa(i)
-			newIP := joinedArrayofIP + "." + temp
+			wg.Add(1)
+			go func(i int) {
+				defer wg.Done()
+				temp := strconv.Itoa(i)
+				newIP := joinedArrayofIP + "." + temp
 
-			pingu, _ := probing.NewPinger(newIP)
-			pingu.SetPrivileged(true)
-			pingu.Count = 1
-			pingu.Timeout = 200 * time.Millisecond
-			pingu.Run()
+				pingu, _ := probing.NewPinger(newIP)
+				pingu.SetPrivileged(true)
+				pingu.Count = 1
+				pingu.Timeout = 200 * time.Millisecond
+				pingu.Run()
 
-			stats := pingu.Statistics()
-			rcv := stats.PacketsRecv
-			if rcv >= 1 {
-				fmt.Println(Green+"Host alive:", Reset+newIP)
-			}
-			if rcv >= 1 && i == 126 {
-				fmt.Println(Green+"Host alive:", Reset+newIP, "<- Fortigate")
-			}
-			if i == 255 {
-				fmt.Println("\nScan completed.")
-				fmt.Print("\n\n\n")
-				goto prompt
-			}
+				stats := pingu.Statistics()
+				rcv := stats.PacketsRecv
+				if rcv >= 1 {
+					if i == 126 {
+						results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate", Green, Reset, newIP)
+					} else {
+						results <- fmt.Sprintf("%sHost alive: %s%s", Green, Reset, newIP)
+					}
+				}
+			}(i)
 		}
+
+		go func() {
+			wg.Wait()
+			close(results)
+		}()
+
+		for result := range results {
+			fmt.Println(result)
+		}
+
+		fmt.Println("\nScan completed.")
+		fmt.Print("\n\n\n")
+		goto prompt
 	} else {
 		fmt.Println("Invalid IP. Please provide a valid IP address.")
 		goto prompt
 	}
-
 }
 
 func isIP(ip string) bool {
@@ -83,7 +97,6 @@ func nmapTest(test string) {
     nmap.WithTargets(&ip),
     nmap.WithPorts(ports)
   )
-  return 
+  return
 }
 */
-
