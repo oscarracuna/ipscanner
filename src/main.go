@@ -26,9 +26,10 @@ func main() {
 prompt:
 	fmt.Print("Enter LAN IP or VNC: ")
 	fmt.Scanln(&ip)
-
+  
 	confirmIP := isIP(ip)
-
+//nmapTest(ip)
+  
 	if confirmIP == true {
 		splitIP := strings.Split(ip, ".")
 		arrayOfIP := splitIP[0:3]
@@ -70,9 +71,10 @@ func isIP(ip string) bool {
 	return ipRegex.MatchString(ip)
 }
 
-/* Testing port discovery with nmap library for Go
-func nmapTest() {
-  ctx, cancel := context.WithTimeout(context.Backgroun(), 1*time.Minute)
+//Testing port discovery with nmap library for Go
+/*
+func nmapTest(test string) {
+  ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
   defer cancel()
 
 
@@ -81,5 +83,7 @@ func nmapTest() {
     nmap.WithTargets(&ip),
     nmap.WithPorts(ports)
   )
+  return 
 }
 */
+
