@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
   "fmt"
+  "strings"
 
 	"github.com/Ullaakut/nmap/v3"
 )
@@ -24,15 +25,16 @@ func Nmap(ip string) string {
 
 	result, _, _ := scanner.Run()
 
-  var porto string
+  var porto []string
   for _, host := range result.Hosts {
     if len(host.Ports) == 0 || len(host.Addresses) == 0 {
       continue
     }
+
 	  for _, port := range host.Ports {
-      porto = fmt.Sprint(port.State)
-      }
+      porto = append(porto, fmt.Sprintf("%d -> %s",port.ID, port.State))
     }
-  return porto
+  }
+  return strings.Join(porto, "\n")
 }
 

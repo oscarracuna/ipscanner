@@ -60,9 +60,9 @@ prompt:
 				rcv := stats.PacketsRecv
 				if rcv >= 1 {
 					if i == 126 {
-            results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate - Ports: %s", Green, Reset, newIP, ports)
+            results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate\nPorts:\n%s", Green, Reset, newIP, ports)
 					} else {
-            results <- fmt.Sprintf("%sHost alive: %s%s - Ports: %s", Green, Reset, newIP, ports)
+            results <- fmt.Sprintf("%sHost alive: %s%s\nPorts:\n%s", Green, Reset, newIP, ports)
 					}
 				}
 			}(i)
@@ -76,8 +76,10 @@ prompt:
 		for result := range results {
 			fmt.Println(result)
 		}
-
-		fmt.Println("\nScan completed.")
+    
+    fmt.Println("\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
+		fmt.Printf("\t%sScan completed.%s\n",Green, Reset)
+    fmt.Println("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
 		fmt.Print("\n\n\n")
 		goto prompt
 	} else {
