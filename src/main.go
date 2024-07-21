@@ -2,6 +2,9 @@ package main
 
 // TODO: Figure out go routines or threads
 // TODO: Pinger function
+// UPDATE: Concurreny works really well but we get false negatives
+// TODO: Improve accuracy by implementing redundancy
+
 
 import (
 	"fmt"
@@ -46,13 +49,13 @@ prompt:
 
 				pingu, _ := probing.NewPinger(newIP)
 				pingu.SetPrivileged(true)
-				pingu.Count = 1
+				pingu.Count = 6
 				pingu.Timeout = 200 * time.Millisecond
 				pingu.Run()
 
 				stats := pingu.Statistics()
 				rcv := stats.PacketsRecv
-				if rcv >= 1 {
+				if rcv >= 3 {
 					if i == 126 {
 						results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate", Green, Reset, newIP)
 					} else {
