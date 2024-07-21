@@ -10,7 +10,6 @@ import (
 
 var (
   ip string
-  porto string
 )
 
 func Nmap(ip string) string {
@@ -25,15 +24,15 @@ func Nmap(ip string) string {
 
 	result, _, _ := scanner.Run()
 
+  var porto string
   for _, host := range result.Hosts {
     if len(host.Ports) == 0 || len(host.Addresses) == 0 {
       continue
     }
-  
-	for _, port := range host.Ports {
-      fmt.Print(port.State)
+	  for _, port := range host.Ports {
+      porto = fmt.Sprint(port.State)
+      }
     }
-  }
   return porto
 }
 
