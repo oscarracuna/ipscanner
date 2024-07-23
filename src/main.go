@@ -5,9 +5,12 @@ package main
 // UPDATE: Concurreny works really well but we get false negatives
 // TODO: Improve accuracy by implementing redundancy
 // Redundancy is not needed. Going for higher threshold for timeouts
+// nmap works great but Go's net library can do it as well
+
 
 import (
 	"fmt"
+	"net"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,15 +18,30 @@ import (
 	"time"
 
 	"github.com/oscarracuna/ipscanner/pkg/ascii"
-  "github.com/oscarracuna/ipscanner/pkg/nmaper"
+	//"github.com/oscarracuna/ipscanner/pkg/nmaper"
 	probing "github.com/prometheus-community/pro-bing"
 )
 
 var (
-	ip    string
-	Green = "\033[32m"
-	Reset = "\033[0m"
+	ip          string
+	Green       = "\033[32m"
+	Reset       = "\033[0m"
+	printerOrNot bool
+	itsPrinter  string
 )
+
+func isIP(ip string) bool {
+	var ipRegex = regexp.MustCompile(`^([0-9]{1,3}\.){3}[0-9]{1,3}$`)
+	return ipRegex.MatchString(ip)
+}
+
+
+func hostName(ip string) []string {
+	name, _ := net.LookupAddr(ip)
+
+	return name
+}
+
 
 func main() {
 	fmt.Println(ascii.Ascii_saludo())
@@ -48,7 +66,9 @@ prompt:
 				temp := strconv.Itoa(i)
 				newIP := joinedArrayofIP + "." + temp
 
-        ports := nmaper.Nmap(newIP)
+				//ports := nmaper.Nmap(newIP)
+				//printer := isPrinter(newIP)
+				hostNombre := hostName(newIP)
 
 				pingu, _ := probing.NewPinger(newIP)
 				pingu.SetPrivileged(true)
@@ -60,9 +80,9 @@ prompt:
 				rcv := stats.PacketsRecv
 				if rcv >= 1 {
 					if i == 126 {
-            results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate\nPorts:\n%s", Green, Reset, newIP, ports)
+						results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate\nHost name:%s\n", Green, Reset, newIP, hostNombre)
 					} else {
-            results <- fmt.Sprintf("%sHost alive: %s%s\nPorts:\n%s", Green, Reset, newIP, ports)
+						results <- fmt.Sprintf("%sHost alive: %s%s\nHost name:%s\n", Green, Reset, newIP, hostNombre)
 					}
 				}
 			}(i)
@@ -76,10 +96,10 @@ prompt:
 		for result := range results {
 			fmt.Println(result)
 		}
-    
-    fmt.Println("\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
-		fmt.Printf("\t%sScan completed.%s\n",Green, Reset)
-    fmt.Println("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
+
+		fmt.Println("\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
+		fmt.Printf("\t%sScan completed.%s\n", Green, Reset)
+		fmt.Println("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
 		fmt.Print("\n\n\n")
 		goto prompt
 	} else {
@@ -88,8 +108,19 @@ prompt:
 	}
 }
 
-func isIP(ip string) bool {
-	var ipRegex = regexp.MustCompile(`^([0-9]{1,3}\.){3}[0-9]{1,3}$`)
-	return ipRegex.MatchString(ip)
-}
 
+/*
+func isPrinter(ip string) bool {
+
+	port := ":80"
+	ipport := ip + port
+	_, err := net.DialTimeout("tcp", ipport, 200)
+	if err != nil {
+		printerOrNot = true
+	} else {
+		printerOrNot = false
+	}
+
+	return printerOrNot
+}
+*/
