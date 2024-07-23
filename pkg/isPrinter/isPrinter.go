@@ -1,7 +1,11 @@
 package isPrinter
 
+// TODO figure out if array or boolean approach
+// Figure out net.JoinHostPort(host, port)
+// Figure out conn
+// wtf is that
+
 import (
-  "fmt"
   "net"
 )
 

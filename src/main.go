@@ -108,19 +108,3 @@ prompt:
 	}
 }
 
-
-/*
-func isPrinter(ip string) bool {
-
-	port := ":80"
-	ipport := ip + port
-	_, err := net.DialTimeout("tcp", ipport, 200)
-	if err != nil {
-		printerOrNot = true
-	} else {
-		printerOrNot = false
-	}
-
-	return printerOrNot
-}
-*/
