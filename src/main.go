@@ -43,6 +43,18 @@ func hostName(ip string) []string {
 }
 
 
+func scanPort(ip string, port string) bool{
+  address := fmt.Sprintf("%s:%s", ip, port)
+  timeout := 3 * time.Second
+  a, err := net.DialTimeout("tcp", address, timeout)
+  if err != nil {
+    return false
+  }
+  a.Close()
+  return true
+
+}
+
 func main() {
 	fmt.Println(ascii.Ascii_saludo())
 
@@ -75,6 +87,10 @@ prompt:
 				pingu.Count = 1
 				pingu.Timeout = 1000 * time.Millisecond
 				pingu.Run()
+        o := scanPort(newIP, "80")
+        if o == true {
+          results <- fmt.Sprintf("=== Port 80 open ===")
+        }
 
 				stats := pingu.Statistics()
 				rcv := stats.PacketsRecv
