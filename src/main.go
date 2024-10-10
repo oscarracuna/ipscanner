@@ -87,18 +87,27 @@ prompt:
 				pingu.Count = 1
 				pingu.Timeout = 1000 * time.Millisecond
 				pingu.Run()
-        o := scanPort(newIP, "80")
-        if o == true {
-          results <- fmt.Sprintf("=== Port 80 open ===")
+        
+        
+        
+        port80Check := scanPort(newIP, "80")
+        if port80 == true {
+          port80 := "80"
+          //results <- fmt.Sprintf("80")
         }
-
+        port443Check := scanPort(newIP, "443")
+        if port8080 == true {
+          port443 := "443"
+          //results <- fmt.Sprintf("8080")
+        }
+        
 				stats := pingu.Statistics()
 				rcv := stats.PacketsRecv
 				if rcv >= 1 {
 					if i == 126 {
 						results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate\nHost name:%s\n", Green, Reset, newIP, hostNombre)
 					} else {
-						results <- fmt.Sprintf("%sHost alive: %s%s\nHost name:%s\n", Green, Reset, newIP, hostNombre)
+            results <- fmt.Sprintf("%sHost alive: %s%s\nHost name:%s\nPorts open:%s, %s", Green, Reset, newIP, hostNombre, port80, port443)
 					}
 				}
 			}(i)
