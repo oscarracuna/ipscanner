@@ -7,53 +7,24 @@ package main
 // Redundancy is not needed. Going for higher threshold for timeouts
 // nmap works great but Go's net library can do it as well
 
-
 import (
 	"fmt"
-	"net"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/oscarracuna/ipscanner/pkg/adios"
 	"github.com/oscarracuna/ipscanner/pkg/ascii"
-	//"github.com/oscarracuna/ipscanner/pkg/nmaper"
+	"github.com/oscarracuna/ipscanner/pkg/portScan"
 	probing "github.com/prometheus-community/pro-bing"
 )
 
 var (
-	ip          string
-	Green       = "\033[32m"
-	Reset       = "\033[0m"
-	printerOrNot bool
-	itsPrinter  string
+	ip    string
+	Green = "\033[32m"
+	Reset = "\033[0m"
 )
-
-func isIP(ip string) bool {
-	var ipRegex = regexp.MustCompile(`^([0-9]{1,3}\.){3}[0-9]{1,3}$`)
-	return ipRegex.MatchString(ip)
-}
-
-
-func hostName(ip string) []string {
-	name, _ := net.LookupAddr(ip)
-
-	return name
-}
-
-
-func scanPort(ip string, port string) bool{
-  address := fmt.Sprintf("%s:%s", ip, port)
-  timeout := 3 * time.Second
-  a, err := net.DialTimeout("tcp", address, timeout)
-  if err != nil {
-    return false
-  }
-  a.Close()
-  return true
-
-}
 
 func main() {
 	fmt.Println(ascii.Ascii_saludo())
@@ -62,7 +33,7 @@ prompt:
 	fmt.Print("Enter LAN IP or VNC: ")
 	fmt.Scanln(&ip)
 
-	confirmIP := isIP(ip)
+	confirmIP := portScan.IsIP(ip)
 
 	if confirmIP {
 		splitIP := strings.Split(ip, ".")
@@ -78,36 +49,28 @@ prompt:
 				temp := strconv.Itoa(i)
 				newIP := joinedArrayofIP + "." + temp
 
-				//ports := nmaper.Nmap(newIP)
-				//printer := isPrinter(newIP)
-				hostNombre := hostName(newIP)
+				hostNombre := portScan.HostName(newIP)
 
 				pingu, _ := probing.NewPinger(newIP)
 				pingu.SetPrivileged(true)
 				pingu.Count = 1
 				pingu.Timeout = 1000 * time.Millisecond
 				pingu.Run()
-        
-        
-        
-        port80Check := scanPort(newIP, "80")
-        if port80 == true {
-          port80 := "80"
-          //results <- fmt.Sprintf("80")
-        }
-        port443Check := scanPort(newIP, "443")
-        if port8080 == true {
-          port443 := "443"
-          //results <- fmt.Sprintf("8080")
-        }
-        
+
 				stats := pingu.Statistics()
 				rcv := stats.PacketsRecv
+				openPorts := portScan.PortScan(newIP)
 				if rcv >= 1 {
+					if i == 100 {
+						results <- fmt.Sprintf("%sHost alive: %s%s <- Printer\nHost name:%s\nOpen ports: %v", Green, Reset, newIP, hostNombre, openPorts)
+					}
+					if i == 103 {
+						results <- fmt.Sprintf("%sHost alive: %s%s <- Scanner\nHost name:%s\nOpen ports: %v", Green, Reset, newIP, hostNombre, openPorts)
+					}
 					if i == 126 {
-						results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate\nHost name:%s\n", Green, Reset, newIP, hostNombre)
+						results <- fmt.Sprintf("%sHost alive: %s%s <- Fortigate\nHost name:%s\nOpen ports: %v", Green, Reset, newIP, hostNombre, openPorts)
 					} else {
-            results <- fmt.Sprintf("%sHost alive: %s%s\nHost name:%s\nPorts open:%s, %s", Green, Reset, newIP, hostNombre, port80, port443)
+						results <- fmt.Sprintf("%sHost alive: %s%s\nHost name:%s\nOpen ports: %v", Green, Reset, newIP, hostNombre, openPorts)
 					}
 				}
 			}(i)
@@ -122,14 +85,10 @@ prompt:
 			fmt.Println(result)
 		}
 
-		fmt.Println("\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
-		fmt.Printf("\t%sScan completed.%s\n", Green, Reset)
-		fmt.Println("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
-		fmt.Print("\n\n\n")
+		adios.Adios()
 		goto prompt
 	} else {
 		fmt.Println("Invalid IP. Please provide a valid IP address.")
 		goto prompt
 	}
 }
-
